@@ -18,11 +18,16 @@ const httpServer = createServer(app);
 dotenv.config();
 const PORT = process.env.PORT;
 const FRONT_ADDRESS = process.env.FRONTADDRESS || "http://localhost:5173";
+const allowedOrigins = (process.env.FRONTADDRESS || "http://localhost:5173").split(",").map((s) => s.trim());
 
 // Socket.io setup
 const io = new Server(httpServer, {
   cors: {
-    origin: FRONT_ADDRESS,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true); // allow non-browser tools or same-origin
+      if (allowedOrigins.indexOf(origin) !== -1) callback(null, true);
+      else callback(new Error("CORS not allowed by origin"));
+    },
     credentials: true,
   },
 });
@@ -95,7 +100,11 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(
   cors({
-    origin: FRONT_ADDRESS,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) !== -1) callback(null, true);
+      else callback(new Error("CORS not allowed by origin"));
+    },
     credentials: true,
   }),
 );

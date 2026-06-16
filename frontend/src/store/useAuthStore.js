@@ -34,6 +34,9 @@ export const useAuthStore = create((set) => ({
       if (res?.data?._id) {
         toast.success("Registered successfully!!");
         set({ authUser: res.data, isInitializing: false });
+        if (res.data?.token) {
+          localStorage.setItem("token", res.data.token);
+        }
         console.log("Auth user set to:", res.data);
         return res.data;
       }
@@ -73,6 +76,9 @@ export const useAuthStore = create((set) => ({
         }
         toast.success("Login successful!!");
         set({ authUser: res.data, isInitializing: false });
+        if (res.data?.token) {
+          localStorage.setItem("token", res.data.token);
+        }
         console.log("Auth user set to:", res.data);
         return res.data;
       }
@@ -226,6 +232,7 @@ export const useAuthStore = create((set) => ({
     try {
       await axiosInstance.post("/auth/logout");
       toast.success("Logged out successfully!!");
+      localStorage.removeItem("token");
       set({ authUser: null });
     } catch (error) {
       toast.error(error.response?.data?.message);

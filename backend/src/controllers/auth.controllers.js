@@ -60,12 +60,12 @@ export const register = async (req, res) => {
     }
 
     if (password.length < 6) {
-      return res
-        .status(400)
-        .json({ message: "Password must be at least 6 characters" });
-    }
-
-    if (role === "student") {
+            res.cookie("token", token, {
+              httpOnly: true,
+              secure: process.env.NODE_ENV === "production",
+              sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+              maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+            });
       if (!fullname || !collegeName) {
         return res
           .status(400)
@@ -201,12 +201,12 @@ export const login = async (req, res) => {
 
     const token = generateToken(user._id);
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    });
+      res.cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
 
     res.status(200).json(formatUserPayload(user, token));
   } catch (error) {
